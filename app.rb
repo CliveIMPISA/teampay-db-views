@@ -1,14 +1,13 @@
 require 'sinatra/base'
-# require 'sinatra/namespace'
 require 'sinatra'
 require 'nbasalaryscrape'
 require 'json'
-require './income'
+require_relative '/model/income'
+require 'haml'
 
 # nbasalaryscrape service
 class TeamPayApp < Sinatra::Base
-  # register Sinatra::Namespace
-
+  
   helpers do
     def get_team(teamname)
       var = SalaryScraper::BasketballReference.new
@@ -127,7 +126,7 @@ class TeamPayApp < Sinatra::Base
     end
   end
 
-  # namespace '/api/v1'  do
+  
     get '/api/v1/:teamname.json' do
       content_type :json
       get_team(params[:teamname]).to_json
@@ -195,7 +194,7 @@ class TeamPayApp < Sinatra::Base
       content_type :json
       get_team_players(params[:teamname]).to_json
     end
-  # end
+  
 
   get '/' do
     erb :index

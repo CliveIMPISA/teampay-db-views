@@ -1,7 +1,6 @@
 require 'sinatra'
 require 'sinatra/activerecord'
-require './environments'
+require_relative '../config/environments'
 
 class Income < ActiveRecord::Base
 end
-
