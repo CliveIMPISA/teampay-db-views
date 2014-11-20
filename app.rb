@@ -2,12 +2,13 @@ require 'sinatra/base'
 require 'sinatra'
 require 'nbasalaryscrape'
 require 'json'
-require_relative '/model/income'
+require_relative 'model/income'
 require 'haml'
+require 'sinatra/flash'
 
 # nbasalaryscrape service
 class TeamPayApp < Sinatra::Base
-  
+
   helpers do
     def get_team(teamname)
       var = SalaryScraper::BasketballReference.new
@@ -126,7 +127,38 @@ class TeamPayApp < Sinatra::Base
     end
   end
 
-  
+
+
+get '/' do
+    haml :home
+  end
+
+  get '/salary' do
+    @teamname = params[:teamname]
+    if @teamname
+      redirect "/salary/#{@teamname}"
+      return nil
+    end
+
+    haml :salary
+  end
+
+  get '/salary/:teamname' do
+    @salary = team
+    @teamname = params[:teamname]
+     haml :salary
+  end
+
+  get '/individualsalaries' do
+    @playername = params[:player_name]
+    if @playername
+      redirect "/salary/#{@playername}"
+      return nil
+    end
+
+    haml :individualsalaries
+  end
+
     get '/api/v1/:teamname.json' do
       content_type :json
       get_team(params[:teamname]).to_json
@@ -194,7 +226,7 @@ class TeamPayApp < Sinatra::Base
       content_type :json
       get_team_players(params[:teamname]).to_json
     end
-  
+
 
   get '/' do
     erb :index
