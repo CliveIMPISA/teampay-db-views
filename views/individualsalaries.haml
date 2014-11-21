@@ -1,9 +1,9 @@
 .container
 
-  %form{action: '/salary', method: 'get', id: 'team-form'}
+  %form{action: '/individualsalaries', method: 'post', id: 'team-form'}
     %div{:align => "center"}
-      %select{:name => "teamName"}
-        %option SELECT TEAM
+      %select{:name => "teamname"}
+        %option{:value => "default"} SELECT TEAM
         %option{:value => "PHO"} Pheonix Suns
         %option{:value => "MIA"} Miami Heat
         %option{:value => "ATL"} Atlanta Hawks
@@ -37,11 +37,12 @@
       %br
       %br
       %div{:align => "center"}
-        %input{type: 'text', name: 'teamname', id: 'home-form-playername1', placeholder: 'First Player here...'}
-        %input{type: 'text', name: 'playername', id: 'home-form-playername2', placeholder: 'Second Player here...'}
+        %input{type: 'text', name: 'playername1', id: 'home-form-playername1', placeholder: 'First Player here...'}
+        %input{type: 'text', name: 'playername2', id: 'home-form-playername2', placeholder: 'Second Player here...'}
         %input{type: 'submit', id: 'home-form-submit', class: 'submit', value: 'submit'}
       %p
 
+    /
       -if @salary
         %table{class: 'center'}
           %tbody

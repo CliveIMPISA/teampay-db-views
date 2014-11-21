@@ -8,9 +8,25 @@ require 'sinatra/flash'
 
 # nbasalaryscrape service
 class TeamPayApp < Sinatra::Base
+  enable :sessions
+  register Sinatra::Flash
+
+  configure :production, :development do
+    enable :logging
+  end
 
   helpers do
     def get_team(teamname)
+      var = SalaryScraper::BasketballReference.new
+      return nil if teamname == 'default'
+      begin
+        var.to_array_of_hashes(teamname.upcase)
+      rescue
+        nil
+      end
+    end
+
+    def get_team2(teamname)
       var = SalaryScraper::BasketballReference.new
       begin
         var.to_array_of_hashes(teamname.upcase)
@@ -33,7 +49,7 @@ class TeamPayApp < Sinatra::Base
     def player_salary_data(teamname, player_name)
 
       begin
-        salary_scrape = get_team(teamname[0])
+        salary_scrape = get_team2(teamname[0])
         player_scrape = []
         player_name.each do |each_player|
           salary_scrape.each do |data_row|
@@ -129,7 +145,7 @@ class TeamPayApp < Sinatra::Base
 
 
 
-get '/' do
+  get '/' do
     haml :home
   end
 
@@ -144,9 +160,14 @@ get '/' do
   end
 
   get '/salary/:teamname' do
-    @salary = team
     @teamname = params[:teamname]
-     haml :salary
+    @salary = get_team(@teamname)
+
+    if @salary.nil?
+      flash[:notice] = 'Please select team from list' if @salary.nil?
+      redirect '/salary'
+    end
+    haml :salary
   end
 
   get '/individualsalaries' do
@@ -159,58 +180,58 @@ get '/' do
     haml :individualsalaries
   end
 
-    get '/api/v1/:teamname.json' do
+  get '/api/v1/:teamname.json' do
       content_type :json
       get_team(params[:teamname]).to_json
-    end
+  end
 
-    get '/api/v1/form' do
-      erb :form
-    end
+  get '/api/v1/form' do
+    erb :form
+  end
 
-    post '/api/v1/check' do
+  post '/api/v1/check' do
+    content_type :json
+    begin
+      req = JSON.parse(request.body.read)
+    rescue
+      halt 400
+    end
+    teamname = req['teamname']
+    player_name = req['player_name']
+    player_salary_data(teamname, player_name).to_json
+  end
+
+  post '/api/v1/check2' do
+    content_type :json
+    begin
+      req = JSON.parse(request.body.read)
+    rescue
+      halt 400
+    end
+    teamname = req['teamname']
+    player_name = req['player_name']
+    player_total_salary(teamname, player_name).to_json
+  end
+
+  post '/api/v1/incomes' do
       content_type :json
-      begin
-        req = JSON.parse(request.body.read)
-      rescue
-        halt 400
-      end
-      teamname = req['teamname']
-      player_name = req['player_name']
-      player_salary_data(teamname, player_name).to_json
+    begin
+      req = JSON.parse(request.body.read)
+    rescue
+      halt 400
     end
+    income = Income.new
+    income.description = req['description'].to_json
+    income.teamnames = req['teamname'].to_json
+    income.player_names = req['player_name'].to_json
 
-    post '/api/v1/check2' do
-      content_type :json
-      begin
-        req = JSON.parse(request.body.read)
-      rescue
-        halt 400
-      end
-      teamname = req['teamname']
-      player_name = req['player_name']
-      player_total_salary(teamname, player_name).to_json
+    if income.save
+      status 201
+      redirect "/api/v1/incomes/#{income.id}"
     end
+  end
 
-    post '/api/v1/incomes' do
-        content_type :json
-      begin
-        req = JSON.parse(request.body.read)
-      rescue
-        halt 400
-      end
-      income = Income.new
-      income.description = req['description'].to_json
-      income.teamnames = req['teamname'].to_json
-      income.player_names = req['player_name'].to_json
-
-      if income.save
-        status 201
-        redirect "/api/v1/incomes/#{income.id}"
-      end
-    end
-
-    post '/api/v1/check3' do
+  post '/api/v1/check3' do
     content_type :json
     begin
       req = JSON.parse(request.body.read)

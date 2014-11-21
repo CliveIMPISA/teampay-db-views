@@ -2,8 +2,8 @@
 
   %form{action: '/salary', method: 'get', id: 'team-form'}
     %div{:align => "center"}
-      %select{:name => "teamName"}
-        %option SELECT TEAM
+      %select{:name => "teamname"}
+        %option{:value => "default"} SELECT TEAM
         %option{:value => "PHO"} Pheonix Suns
         %option{:value => "MIA"} Miami Heat
         %option{:value => "ATL"} Atlanta Hawks
@@ -37,19 +37,41 @@
       %br
       %br
       %div{:align => "center"}
-        %input{type: 'text', name: 'playername', id: 'home-form-playername', placeholder: 'Player Name here...'}
+        / %input{type: 'text', name: 'playername', id: 'home-form-playername', placeholder: 'Player Name here...'}
         %input{type: 'submit', id: 'home-form-submit', class: 'submit', value: 'submit'}
       %p
 
       -if @salary
-        %table{class: 'center'}
+        %table{class: 'center', :border => '1'}
+          %caption Team pay for #{@teamname}
           %tbody
             %tr
-              %th Badge
-              %th Date
-            -@salary['badges'].each do |badge|
+              %th Player
+              %th 2014-15
+              %th 2015-16
+              %th 2016-17
+              %th 2017-18
+              %th 2018-19
+              %th 2019-20
+              %th Signed Using
+              %th Guaranted
+            -@salary.each do |player|
               %tr
                 %td
-                  = badge['id']
+                  = player['Player']
                 %td{width: '300'}
-                  = badge['date']
+                  = player['2014-15']
+                %td{width: '300'}
+                  = player['2015-16']
+                %td{width: '300'}
+                  = player['2016-17']
+                %td{width: '300'}
+                  = player['2017-18']
+                %td{width: '300'}
+                  = player['2018-19']
+                %td{width: '300'}
+                  = player['2019-20']
+                %td{width: '300'}
+                  = player['Signed Using']
+                %td{width: '300'}
+                  = player['Guaranteed']
