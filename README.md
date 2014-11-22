@@ -1,5 +1,6 @@
 [ ![Codeship Status for CliveIMPISA/teampay-db-views](https://codeship.com/projects/53d69530-5383-0132-6b4d-4ac7d15cf06b/status)](https://codeship.com/projects/48953)
 ========
+
 Uses the nbasalaryscrape gem, Sinatra and Heroku cloud platform to create a web service.
 ## About
 [Team Pay]("https://team-pay.herokuapp.com") uses a combination of GET and POST request to display several useful information about and NBA basketball team players' salary.
