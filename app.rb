@@ -90,7 +90,7 @@ class TeamPayApp < Sinatra::Base
     end
 
     def two_players_salary_data(teamname, player_name)
-      return nil if teamname == 'default' 
+      return nil if teamname == 'default'
       player_scrape = []
       begin
         salary_scrape = get_team(teamname[0])
