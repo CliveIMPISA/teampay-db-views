@@ -17,6 +17,7 @@ ActiveRecord::Schema.define(version: 20141116030459) do
     t.string   "description"
     t.text     "teamnames"
     t.text     "player_names"
+    t.text     "player_names2"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

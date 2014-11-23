@@ -100,7 +100,7 @@ class TeamPayApp < Sinatra::Base
           end
         end
       rescue
-        halt 404
+        nil
       else
         make_salary_comparisons(player_scrape)
       end
@@ -143,8 +143,6 @@ class TeamPayApp < Sinatra::Base
     end
   end
 
-
-
   get '/' do
     haml :home
   end
@@ -171,13 +169,65 @@ class TeamPayApp < Sinatra::Base
   end
 
   get '/individualsalaries' do
-    @playername = params[:player_name]
-    if @playername
-      redirect "/salary/#{@playername}"
-      return nil
+    haml :individualsalaries
+  end
+
+  post '/individualsalaries' do
+    income = Income.new
+    income.player_names2 = params[:playername2]
+    income.teamnames = params[:teamname]
+    income.player_names = params[:playername1]
+
+    if income.save
+      redirect "/individualsalaries/#{income.id}"
     end
 
     haml :individualsalaries
+  end
+
+  get '/individualsalaries/:id' do
+
+      income = Income.find(params[:id])
+      teamname = [income.teamnames]
+      player_names = [income.player_names,income.player_names2]
+      @Results = two_players_salary_data(teamname, player_names)
+    if @Results.nil?
+      flash[:notice] = 'Error! Incorrect Inputs' if @Results.nil?
+      redirect '/individualsalaries'
+    end
+
+
+    haml :individualsalaries
+  end
+
+  get '/api/v1/incomes/:id' do
+    content_type :json
+    begin
+      income = Income.find(params[:id])
+      teamname = JSON.parse(income.teamnames)
+      player_names = JSON.parse(income.player_names)
+    rescue
+      halt 400
+    end
+    player_total_salary(teamname, player_names).to_json
+  end
+
+  post '/api/v1/incomes' do
+      content_type :json
+    begin
+      req = JSON.parse(request.body.read)
+    rescue
+      halt 400
+    end
+    income = Income.new
+    income.description = req['description'].to_json
+    income.teamnames = req['teamname'].to_json
+    income.player_names = req['player_name'].to_json
+
+    if income.save
+      status 201
+      redirect "/api/v1/incomes/#{income.id}"
+    end
   end
 
   get '/api/v1/:teamname.json' do
@@ -213,24 +263,6 @@ class TeamPayApp < Sinatra::Base
     player_total_salary(teamname, player_name).to_json
   end
 
-  post '/api/v1/incomes' do
-      content_type :json
-    begin
-      req = JSON.parse(request.body.read)
-    rescue
-      halt 400
-    end
-    income = Income.new
-    income.description = req['description'].to_json
-    income.teamnames = req['teamname'].to_json
-    income.player_names = req['player_name'].to_json
-
-    if income.save
-      status 201
-      redirect "/api/v1/incomes/#{income.id}"
-    end
-  end
-
   post '/api/v1/check3' do
     content_type :json
     begin
@@ -243,31 +275,14 @@ class TeamPayApp < Sinatra::Base
     two_players_salary_data(teamname, player_name).to_json
   end
 
-    get '/api/v1/players/:teamname.json' do
-      content_type :json
-      get_team_players(params[:teamname]).to_json
-    end
-
-
-  get '/' do
-    erb :index
+  get '/api/v1/players/:teamname.json' do
+    content_type :json
+    get_team_players(params[:teamname]).to_json
   end
 
   post '/form' do
     content_type :json
     get_team(params[:message]).to_json
-  end
-
-  get '/api/v1/incomes/:id' do
-    content_type :json
-    begin
-      income = Income.find(params[:id])
-      teamname = JSON.parse(income.teamnames)
-      player_names = JSON.parse(income.player_names)
-    rescue
-      halt 400
-    end
-    player_total_salary(teamname, player_names).to_json
   end
 
   not_found do
