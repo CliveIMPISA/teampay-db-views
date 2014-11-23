@@ -82,14 +82,22 @@ class TeamPayApp < Sinatra::Base
 
     def player_total_salary(teamname, player_name)
       players = []
-      salary_scrape = get_team(teamname[0])
-      player_name.each do |each_player|
-        salary_scrape.each do |data_row|
-          if data_row['Player'] == each_player
-            players << one_total(data_row, each_player)
+      return nil if teamname[0] == 'default'
+
+      begin
+        salary_scrape = get_team(teamname[0])
+        player_name.each do |each_player|
+          salary_scrape.each do |data_row|
+            if data_row['Player'] == each_player
+              players << one_total(data_row, each_player)
+            end
           end
         end
+      rescue
+        nil
       end
+
+        return if players.length==0
       players
     end
 
@@ -245,6 +253,45 @@ class TeamPayApp < Sinatra::Base
 
 
     haml :individualsalaries
+  end
+
+  get '/playertotal' do
+    haml :playertotal
+  end
+
+  post '/playertotal' do
+    income = Income.new
+    income.teamnames = params[:teamname]
+    income.player_names = params[:playername1]
+
+    if params[:playername1]==""
+      flash[:notice] = 'Error! Incorrect Inputs'
+      redirect '/playertotal'
+    end
+
+    if income.save
+      redirect "/playertotal/#{income.id}"
+    end
+
+    haml :playertotal
+  end
+
+  get '/playertotal/:id' do
+
+      income = Income.find(params[:id])
+      teamname = [income.teamnames]
+      player_names = [income.player_names]
+      @Result = player_total_salary(teamname, player_names)
+    if @Result.nil?
+      flash[:notice] = 'Players Not Found! Check Spelling and Team selected' if @Result.nil?
+      redirect '/playertotal'
+    else
+      @player=@Result[0][0]['player']
+      @fullpay=@Result[0][0]['fullpay']
+    end
+
+
+    haml :playertotal
   end
 
   get '/api/v2/incomes/:id' do
