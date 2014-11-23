@@ -191,6 +191,13 @@ class TeamPayApp < Sinatra::Base
       money = "$#{data.to_s.reverse.gsub(/...(?=.)/, '\&,').reverse}"
       money
     end
+
+    def current_page?(path = ' ')
+      path_info = request.path_info
+      path_info += ' ' if path_info == '/'
+      request_path = path_info.split '/'
+      request_path[1] == path
+    end
   end
 
   get '/' do
