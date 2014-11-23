@@ -90,6 +90,7 @@ class TeamPayApp < Sinatra::Base
     end
 
     def two_players_salary_data(teamname, player_name)
+      return nil if teamname == 'default' 
       player_scrape = []
       begin
         salary_scrape = get_team(teamname[0])
@@ -99,6 +100,7 @@ class TeamPayApp < Sinatra::Base
             player_scrape << diff_total(data_row, each_player) if data_row['Player'] == each_player
           end
         end
+        make_salary_comparisons(player_scrape)
       rescue
         nil
       else
@@ -178,6 +180,11 @@ class TeamPayApp < Sinatra::Base
     income.teamnames = params[:teamname]
     income.player_names = params[:playername1]
 
+    if params[:playername2]=="" || params[:playername1]==""
+      flash[:notice] = 'Error! Incorrect Inputs'
+      redirect '/individualsalaries'
+    end
+
     if income.save
       redirect "/individualsalaries/#{income.id}"
     end
@@ -192,7 +199,7 @@ class TeamPayApp < Sinatra::Base
       player_names = [income.player_names,income.player_names2]
       @Results = two_players_salary_data(teamname, player_names)
     if @Results.nil?
-      flash[:notice] = 'Error! Incorrect Inputs' if @Results.nil?
+      flash[:notice] = 'Players Not Found! Check Spelling and Team selected' if @Results.nil?
       redirect '/individualsalaries'
     end
 
