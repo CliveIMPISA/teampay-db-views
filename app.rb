@@ -89,6 +89,23 @@ class TeamPayApp < Sinatra::Base
       players
     end
 
+    def player_total_salary2(teamname, player_name)
+      players = []
+      begin
+        salary_scrape = get_team(teamname[0])
+        player_name.each do |each_player|
+          salary_scrape.each do |data_row|
+            if data_row['Player'] == each_player
+              players << one_total(data_row, each_player)
+            end
+          end
+        end
+      rescue
+        halt 404
+      end
+      players
+    end
+
     def two_players_salary_data(teamname, player_name)
       return nil if teamname == 'default'
       player_scrape = []
@@ -103,6 +120,25 @@ class TeamPayApp < Sinatra::Base
         make_salary_comparisons(player_scrape)
       rescue
         nil
+      else
+        make_salary_comparisons(player_scrape)
+      end
+    end
+
+    def two_players_salary_data2(teamname, player_name)
+      return nil if teamname == 'default'
+      player_scrape = []
+      begin
+        salary_scrape = get_team(teamname[0])
+
+        player_name.each do |each_player|
+          salary_scrape.each do |data_row|
+            player_scrape << diff_total(data_row, each_player) if data_row['Player'] == each_player
+          end
+        end
+        make_salary_comparisons(player_scrape)
+      rescue
+        halt 404
       else
         make_salary_comparisons(player_scrape)
       end
@@ -239,7 +275,8 @@ class TeamPayApp < Sinatra::Base
 
   get '/api/v1/:teamname.json' do
       content_type :json
-      get_team(params[:teamname]).to_json
+      get_team2(params[:teamname]).to_json
+
   end
 
   get '/api/v1/form' do
@@ -267,7 +304,7 @@ class TeamPayApp < Sinatra::Base
     end
     teamname = req['teamname']
     player_name = req['player_name']
-    player_total_salary(teamname, player_name).to_json
+    player_total_salary2(teamname, player_name).to_json
   end
 
   post '/api/v1/check3' do
@@ -279,7 +316,7 @@ class TeamPayApp < Sinatra::Base
     end
     teamname = req['teamname']
     player_name = req['player_name']
-    two_players_salary_data(teamname, player_name).to_json
+    two_players_salary_data2(teamname, player_name).to_json
   end
 
   get '/api/v1/players/:teamname.json' do
