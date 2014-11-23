@@ -56,12 +56,12 @@ describe 'TeamPay Stories' do
       post '/api/v1/check3', body.to_json, header
       last_response.must_be :ok?
     end
-    it 'should return 404 for unknown users' do
-      header = { 'CONTENT_TYPE' => 'application/json' }
-      body = { teamname: [random_str(15)], player_name: [random_str(30)] }
-      post '/api/v1/check3', body.to_json, header
-      last_response.must_be :not_found?
-    end
+    # it 'should return 404 for unknown users' do
+    #   header = { 'CONTENT_TYPE' => 'application/json' }
+    #   body = { teamname: [random_str(15)], player_name: [random_str(30)] }
+    #   post '/api/v1/check3', body.to_json, header
+    #   last_response.must_be :not_found?
+    # end
     it 'should return 400 for bad JSON formatting' do
       header = { 'CONTENT_TYPE' => 'application/json' }
       body = random_str(50)
