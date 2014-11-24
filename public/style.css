@@ -13,7 +13,27 @@ body {
 	font-weight: 400;
 	color: #000000;
 }
+#foot{
 
+  width: 450px ;
+  margin-left: auto ;
+  margin-right: auto ;
+	background-color:#ffffff;
+	border:#ff6816 1px solid;
+	border-radius: 8px;
+	background: #dda304; /* Old browsers */
+background: #dbdbdb; /* Old browsers */
+background: -moz-radial-gradient(center, ellipse cover,  #dbdbdb 26%, #fffaf9 100%); /* FF3.6+ */
+background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(26%,#dbdbdb), color-stop(100%,#fffaf9)); /* Chrome,Safari4+ */
+background: -webkit-radial-gradient(center, ellipse cover,  #dbdbdb 26%,#fffaf9 100%); /* Chrome10+,Safari5.1+ */
+background: -o-radial-gradient(center, ellipse cover,  #dbdbdb 26%,#fffaf9 100%); /* Opera 12+ */
+background: -ms-radial-gradient(center, ellipse cover,  #dbdbdb 26%,#fffaf9 100%); /* IE10+ */
+background: radial-gradient(ellipse at center,  #dbdbdb 26%,#fffaf9 100%); /* W3C */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#dbdbdb', endColorstr='#fffaf9',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+
+
+
+}
 h1, h2, h3 {
 	margin: 0;
 	padding: 0;
@@ -37,7 +57,7 @@ a
 	color: #0000FF;
 }
 
-a.lightlink {
+a .lightlink {
 	color: #DDDDDD;
 }
 
@@ -61,13 +81,14 @@ div.flash {
 	color: #FFFFFF;
 	font-weight: bold;
 	background: #FF0000;
+
 }
 
 /*Header*/
 
 #header_wrapper {
 	overflow: hidden;
-	padding: 5em 0em;
+	padding: 3em 0em;
 	background: #8DCB89 url(header.jpg) no-repeat center;
 	background-size: cover;
 }
@@ -102,6 +123,14 @@ div.flash {
 	background: #ff6816;
 	border-radius: 8px;
 	color: #FFF;
+}
+#menu .non-current_page_item a
+{
+	background: #000000;
+	border-radius: 8px;
+	color: #FFF;
+	border:#FFFFFF 1px solid;
+	color:#ff6816;
 }
 
 /*Title*/
@@ -145,6 +174,7 @@ form label
 	margin-bottom: 0.5em;
 }
 
+
 form .submit
 {
 	/*margin-top: 2em;*/
@@ -157,10 +187,11 @@ form .submit
 .footer {
 	overflow: hidden;
 	padding: 5em 0em;
-	background: url(header.jpg) center;
+	background: url(footer.jpg) center;
 	border-top: 1px solid rgba(255,255,255,0.08);
 	text-align: center;
 	color: green;
+
 }
 
 .user-input {
@@ -170,4 +201,7 @@ form .submit
 
 .user-output {
 	float: left;
+}
+a.highlight:hover {
+		color: #ff0000;
 }
