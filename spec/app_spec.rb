@@ -105,9 +105,9 @@ describe 'TeamPay Stories' do
   end
 
   describe 'Check for teams salary' do
-    # before do
-    #   Income.delete_all
-    # end
+    before do
+      Income.delete_all
+    end
 
     it "should find players' salary" do
       header = { 'CONTENT_TYPE' => 'application/json' }
