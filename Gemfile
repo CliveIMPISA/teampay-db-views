@@ -5,7 +5,10 @@ gem 'sinatra-contrib'
 gem 'nbasalaryscrape'
 gem 'nokogiri'
 gem 'json'
-gem 'tilt', '~> 1.4.1'
+
+gem 'tilt'
+gem 'haml'
+gem 'sinatra-flash'
 
 gem 'activerecord'
 gem 'sinatra-activerecord'
