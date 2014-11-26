@@ -2,7 +2,7 @@
 
   %form{action: '/salary', method: 'get', id: 'team-form'}
     %div{:align => "center"}
-      %select{:name => "teamname"}
+      %select{:name => "teamname", class: 'styled_select'}
         %option{:value => "default"} SELECT TEAM
         %option{:value => "PHO"} Pheonix Suns
         %option{:value => "MIA"} Miami Heat
@@ -37,7 +37,7 @@
       %br
       %br
       %div{:align => "center"}
-        / %input{type: 'text', name: 'playername', id: 'home-form-playername', placeholder: 'Player Name here...'}
+        / %input{type: 'text', name: 'playername', class:'textbox', id: 'home-form-playername', placeholder: 'Player Name here...'}
         %input{type: 'submit', id: 'home-form-submit', class: 'submit', value: 'submit'}
       %p
 
