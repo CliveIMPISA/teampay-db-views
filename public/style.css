@@ -73,7 +73,7 @@ table.center {
 }
 
 section {
-	background: #EDEDED;
+	background: url(images/background.png);
 }
 
 div.flash {
@@ -89,7 +89,7 @@ div.flash {
 #header_wrapper {
 	overflow: hidden;
 	padding: 3em 0em;
-	background: #8DCB89 url(header.jpg) no-repeat center;
+	background: #8DCB89 url(images/header.jpg) no-repeat center;
 	background-size: cover;
 }
 
@@ -154,8 +154,7 @@ div.flash {
 	color: #6F6F6F;
 }
 
-	.container
-	{
+.container{
 		text-align: center;
 		margin: 0px auto;
 		width: 1000px;
@@ -175,25 +174,54 @@ form label
 }
 
 
-form .submit
-{
-	/*margin-top: 2em;*/
+form .submit{
 	background: #8DCB89;
 	border-radius: 3px;
-	/*line-height: 1.5em;*/
-	/*font-size: 1.3em;*/
+	height: 29px;
+	width:100px;
 }
 
 .footer {
 	overflow: hidden;
 	padding: 5em 0em;
-	background: url(footer.jpg) center;
+	background: url(images/footer.jpg) center;
 	border-top: 1px solid rgba(255,255,255,0.08);
 	text-align: center;
 	color: green;
 
 }
-
+.textbox {
+	width: 200px;
+	height: 20px;
+	border: solid 2px #5A95E5;
+	padding: 2px;
+	border-radius: 5px;
+	font-size: 12px;
+	box-shadow: 0px 1px 2px 0px #5A95E5;
+	background-color: white;
+	outline: none;
+	color: #474747;
+}
+.textbox:hover  {
+	border: 2px solid #377edf;
+}
+.textbox:focus  {
+	border: solid 2px #377edf;
+	box-shadow: inset 0px 1px 2px 0px #377edf;
+}
+.textbox:active  {
+	border: solid 2px #377edf;
+}
+.styled_select{
+	background: white;
+	border: solid 2px #5A95E5;
+	font-size: 14px;
+	height: 29px;
+	width: 268px;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+}
 .user-input {
 	float: left;
 	width: 50%;
