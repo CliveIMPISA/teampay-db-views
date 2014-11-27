@@ -45,3 +45,8 @@
 
       -if @Results
         %label{} #{@Results}
+
+      %p
+        -if @Results
+          %form
+            %input{type: 'submit', name: 'delete', class: 'submit', value: 'delete'}

@@ -44,3 +44,8 @@
 
       -if @Result
         %label{} #{@player} #{@fullpay}
+
+      %p
+        -if @Result
+          %form
+            %input{type: 'submit', name: 'delete', class: 'submit', value: 'delete'}
