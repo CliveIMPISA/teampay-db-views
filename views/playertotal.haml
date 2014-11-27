@@ -47,5 +47,7 @@
 
       %p
         -if @Result
-          %form
+          %form{action:'', method:'post'}
+            %input{type: 'submit', name: 'put', class: 'submit', value: 'put'}
+          %form{action:'', method:'post'}
             %input{type: 'submit', name: 'delete', class: 'submit', value: 'delete'}
