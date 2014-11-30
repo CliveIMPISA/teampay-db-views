@@ -15,9 +15,9 @@ ActiveRecord::Schema.define(version: 20141116030459) do
 
   create_table "incomes", force: true do |t|
     t.string   "description"
-    t.text     "teamnames"
-    t.text     "player_names"
-    t.text     "player_names2"
+    t.text     "teamname"
+    t.text     "playername1"
+    t.text     "playername2"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

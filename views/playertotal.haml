@@ -42,11 +42,11 @@
       %p
 
 
-      -if @Result
-        %label{} #{@player} #{@fullpay}
+      -if @fullpay
+        %label{} #{@fullpay} 
 
       %p
-        -if @Result
+        -if @fullpay
           %form{action:'', method:'post'}
             %input{type: 'submit', name: 'put', class: 'submit', value: 'put'}
           %form{action:'', method:'post'}

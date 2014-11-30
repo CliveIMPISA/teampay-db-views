@@ -5,6 +5,7 @@ gem 'sinatra-contrib'
 gem 'nbasalaryscrape'
 gem 'nokogiri'
 gem 'json'
+gem 'httparty'
 
 gem 'tilt'
 gem 'haml'
