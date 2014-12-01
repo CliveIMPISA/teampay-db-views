@@ -43,12 +43,9 @@
       %p
 
 
-      -if @Results
-        %label{} #{@Results}
+      -if @results
+        %label{} #{@results}
 
-      %p
-        -if @Results
-          %form{action:'', method:'post'}
-            %input{type: 'submit', name: 'put', class: 'submit', value: 'put'}
-          %form{action:'', method:'post'}
-            %input{type: 'submit', name: 'delete', class: 'submit', value: 'delete'}
+      %form{action: "/individualsalaries/#{@id}" , :method => 'post' , :id => 'delete-form'}
+        - if @action == :update
+          %input{:type => 'submit' , :name => '_method', :value => 'delete'}
