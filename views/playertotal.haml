@@ -43,11 +43,7 @@
 
 
       -if @fullpay
-        %label{} #{@fullpay} 
-
-      %p
-        -if @fullpay
-          %form{action:'', method:'post'}
-            %input{type: 'submit', name: 'put', class: 'submit', value: 'put'}
-          %form{action:'', method:'post'}
-            %input{type: 'submit', name: 'delete', class: 'submit', value: 'delete'}
+        %label{} #{@fullpay}
+        %form{action: "/playertotal/#{@id}" , :method => 'post' , :id => 'delete-form'}
+          - if @action == :update
+            %input{:type => 'submit' , :name => '_method', :value => 'delete'}

@@ -233,6 +233,21 @@ class TeamPayApp < Sinatra::Base
     haml :salary
   end
 
+  delete '/individualsalaries/:id' do
+    request_url = "#{API_BASE_URI}/api/v1/check3/#{params[:id]}"
+    result = HTTParty.delete(request_url)
+    flash[:notice] = 'record deleted'
+    redirect '/individualsalaries'
+  end
+
+  delete '/playertotal' do
+    request_url = "#{API_BASE_URI}/api/v1/incomes/#{params[:id]}"
+    result = HTTParty.delete(request_url)
+    flash[:notice] = 'record deleted'
+    redirect '/playertotal'
+  end
+
+
   get '/individualsalaries' do
     @action = :create
     haml :individualsalaries
@@ -273,8 +288,6 @@ class TeamPayApp < Sinatra::Base
   end
 
   get '/individualsalaries/:id' do
-
-
     if session[:action] == :create
       @results = session[:result]
       @teamname = session[:teamname]
@@ -314,7 +327,7 @@ class TeamPayApp < Sinatra::Base
     incomes.playername2 = req['playername2']
 
     if incomes.save
-      redirect "api/v1/check3/#{incomes.id}"
+      redirect "/api/v1/check3/#{incomes.id}"
     end
   end
 
@@ -323,12 +336,8 @@ class TeamPayApp < Sinatra::Base
     logger.info "GET /api/v1/check3/#{params[:id]}"
     begin
       @income = Income.find(params[:id])
-
       teamname = [@income.teamname]
-      puts teamname
       playernames = [@income.playername1,@income.playername2]
-
-
     rescue
       halt 400
     end
@@ -345,7 +354,6 @@ class TeamPayApp < Sinatra::Base
 
   post '/playertotal' do
     request_url = "#{API_BASE_URI}/api/v1/incomes"
-
 
     teamname = params[:teamname]
     playername1 = params[:playername1]
@@ -390,31 +398,11 @@ class TeamPayApp < Sinatra::Base
 
     @id = params[:id]
     @action2 = :update
-
     haml :playertotal
   end
 
   delete '/api/v1/incomes/:id' do
     income = Income.destroy(params[:id])
-  end
-
-  get '/api/v1/incomes/:id' do
-    content_type :json
-    logger.info "GET /api/v1/incomes/#{params[:id]}"
-    begin
-      @total = Income.find(params[:id])
-      teamname = [@total.teamname]
-      puts teamname
-      playername1 = [@total.playername1]
-      puts playername1
-
-    rescue
-      halt 400
-    end
-
-    result = player_total_salary2(teamname, playername1).to_json
-    logger.info "result: #{result}\n"
-    result
   end
 
   post '/api/v1/incomes' do
@@ -434,8 +422,24 @@ class TeamPayApp < Sinatra::Base
     incomes.playername1 = req['playername1']
 
     if incomes.save
-      redirect "api/v1/incomes/#{incomes.id}"
+      redirect "/api/v1/incomes/#{incomes.id}"
     end
+  end
+
+  get '/api/v1/incomes/:id' do
+    content_type :json
+    logger.info "GET /api/v1/incomes/#{params[:id]}"
+    begin
+      @total = Income.find(params[:id])
+      teamname = [@total.teamname]
+      playername1 = [@total.playername1]
+    rescue
+      halt 400
+    end
+
+    result = player_total_salary2(teamname, playername1).to_json
+    logger.info "result: #{result}\n"
+    result
   end
 
   get '/api/v1/:teamname.json' do
