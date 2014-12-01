@@ -240,7 +240,7 @@ class TeamPayApp < Sinatra::Base
     redirect '/individualsalaries'
   end
 
-  delete '/playertotal' do
+  delete '/playertotal/:id' do
     request_url = "#{API_BASE_URI}/api/v1/incomes/#{params[:id]}"
     result = HTTParty.delete(request_url)
     flash[:notice] = 'record deleted'
@@ -298,6 +298,7 @@ class TeamPayApp < Sinatra::Base
       options =  { headers: { 'Content-Type' => 'application/json' } }
       result = HTTParty.get(request_url, options)
       @results = result
+      @id = params[:id]
     end
 
     @id = params[:id]
