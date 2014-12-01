@@ -48,4 +48,4 @@
 
       %form{action: "/individualsalaries/#{@id}" , :method => 'post' , :id => 'delete-form'}
         - if @action == :update
-          %input{:type => 'submit' , :name => '_method', :value => 'delete'}
+          %input{:type => 'submit' , :name => '_method', class => "submit", :value => 'delete'}
