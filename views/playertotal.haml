@@ -81,17 +81,8 @@
           %input{type: 'submit', id: 'home-form-submit', class: 'submit', value: 'submit'}
       %p
 
-
-      -if @Result
-        %label{} #{@player} #{@fullpay}
-
-
-      %p
-        -if @Result
-          %a{href: "/playertotal/edit/#{@id}"}
-            %button{type: 'button', class: 'submit'} edit
-
-      %p
-        -if @Result
-          %form{action:'', method:'post'}
-            %input{type: 'submit', name: '_method', class: 'submit', value: 'delete'}
+  -if @fullpay
+    %label{} #{@fullpay}
+    %form{action: "/playertotal/#{@id}" , :method => 'post' , :id => 'delete-form'}
+      - if @action2 == :update
+        %input{:type => 'submit' , :name => '_method', :value => 'delete'}
