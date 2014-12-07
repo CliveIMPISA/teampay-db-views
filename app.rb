@@ -306,48 +306,6 @@ class TeamPayApp < Sinatra::Base
     haml :individualsalaries
   end
 
-  delete '/api/v1/check3/:id' do
-    income = Income.destroy(params[:id])
-  end
-
-  post '/api/v1/check3' do
-    content_type :json
-
-    body = request.body.read
-    logger.info body
-    begin
-      req = JSON.parse(body)
-      logger.info req
-    rescue Exception => e
-      puts e.message
-      halt 400
-    end
-    incomes = Income.new
-    incomes.teamname = req['teamname']
-    incomes.playername1 = req['playername1']
-    incomes.playername2 = req['playername2']
-
-    if incomes.save
-      redirect "/api/v1/check3/#{incomes.id}"
-    end
-  end
-
-  get '/api/v1/check3/:id' do
-    content_type :json
-    logger.info "GET /api/v1/check3/#{params[:id]}"
-    begin
-      @income = Income.find(params[:id])
-      teamname = [@income.teamname]
-      playernames = [@income.playername1,@income.playername2]
-    rescue
-      halt 400
-    end
-
-    result = two_players_salary_data2(teamname, playernames).to_json
-    logger.info "result: #{result}\n"
-    result
-  end
-
   get '/playertotal' do
     @action2 = :create
     haml :playertotal
@@ -402,6 +360,51 @@ class TeamPayApp < Sinatra::Base
     @id = params[:id]
     @action2 = :update
     haml :playertotal
+  end
+
+
+  #API
+  
+  delete '/api/v1/check3/:id' do
+    income = Income.destroy(params[:id])
+  end
+
+  post '/api/v1/check3' do
+    content_type :json
+
+    body = request.body.read
+    logger.info body
+    begin
+      req = JSON.parse(body)
+      logger.info req
+    rescue Exception => e
+      puts e.message
+      halt 400
+    end
+    incomes = Income.new
+    incomes.teamname = req['teamname']
+    incomes.playername1 = req['playername1']
+    incomes.playername2 = req['playername2']
+
+    if incomes.save
+      redirect "/api/v1/check3/#{incomes.id}"
+    end
+  end
+
+  get '/api/v1/check3/:id' do
+    content_type :json
+    logger.info "GET /api/v1/check3/#{params[:id]}"
+    begin
+      @income = Income.find(params[:id])
+      teamname = [@income.teamname]
+      playernames = [@income.playername1,@income.playername2]
+    rescue
+      halt 400
+    end
+
+    result = two_players_salary_data2(teamname, playernames).to_json
+    logger.info "result: #{result}\n"
+    result
   end
 
   delete '/api/v1/incomes/:id' do
