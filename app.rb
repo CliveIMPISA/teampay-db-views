@@ -5,15 +5,19 @@ require 'json'
 require_relative 'model/income'
 require 'haml'
 require 'sinatra/flash'
+require 'httparty'
 
 # nbasalaryscrape service
 class TeamPayApp < Sinatra::Base
   enable :sessions
   register Sinatra::Flash
+  use Rack::MethodOverride
 
   configure :production, :development do
     enable :logging
   end
+
+  API_BASE_URI = 'http://localhost:9393'
 
   helpers do
     def get_team(teamname)
@@ -280,15 +284,30 @@ class TeamPayApp < Sinatra::Base
       redirect "/playertotal/#{income.id}"
     end
 
+    if session[:action] == :edit
+      session[:action] = :create
+    end
+
+    haml :playertotal
+  end
+
+  get '/playertotal/edit/:id' do
+    session[:action] = :edit
+    @id = params[:id]
+    income = Income.find(@id)
+    @teamname = income.teamnames
+    @player = income.player_names
+
     haml :playertotal
   end
 
   get '/playertotal/:id' do
-
-      income = Income.find(params[:id])
+      @id = params[:id]
+      income = Income.find(@id)
       teamname = [income.teamnames]
       player_names = [income.player_names]
       @Result = player_total_salary(teamname, player_names)
+
     if @Result.nil?
       flash[:notice] = 'Players Not Found! Check Spelling and Team selected' if @Result.nil?
       redirect '/playertotal'
@@ -297,9 +316,28 @@ class TeamPayApp < Sinatra::Base
       @fullpay=@Result[0][0]['fullpay']
     end
 
-
     haml :playertotal
   end
+
+  put '/playertotal' do
+    @id = params[:id]
+    @new_teamname = params[:teamname]
+    @player_name = params[:playername1]
+    put_url = "#{API_BASE_URI}/api/v2/playertotal/#{@id}/#{@new_teamname}/#{@player_name}"
+    options = {
+                headers: { 'Content-Type' => 'application/json' }
+              }
+    response = HTTParty.put(put_url, options)
+    flash[:notice] = 'Record updated'
+    redirect "/playertotal/#{@id}"
+  end
+
+  not_found do
+    status 404
+    'not found'
+  end
+
+  #API here
 
   get '/api/v2/incomes/:id' do
     content_type :json
@@ -311,6 +349,16 @@ class TeamPayApp < Sinatra::Base
       halt 400
     end
     player_total_salary2(teamname, player_names).to_json
+  end
+
+  put 'api/v2/playertotal/:id/:teamname/:player_name1' do
+    begin
+      if session[:action] == 'edit'
+        Income.update(params[:id], :teamnames => params[:teamname], :player_names => params[:player_name1])
+      end
+    rescue
+      halt 400
+    end
   end
 
   post '/api/v2/incomes' do
@@ -377,8 +425,4 @@ class TeamPayApp < Sinatra::Base
     two_players_salary_data2(teamname, player_name).to_json
   end
 
-  not_found do
-    status 404
-    'not found'
-  end
 end
