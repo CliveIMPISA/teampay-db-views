@@ -13,7 +13,6 @@ gem 'sinatra-flash'
 
 gem 'activerecord'
 gem 'sinatra-activerecord'
-gem 'httparty'
 
 group :development do
   gem 'sqlite3'

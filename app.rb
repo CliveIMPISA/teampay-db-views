@@ -1,8 +1,9 @@
 require 'sinatra/base'
 require 'sinatra'
-require 'nbasalaryscrape'
 require 'json'
+#require 'nbasalaryscrape'
 require_relative 'model/income'
+require_relative 'helpers'
 require 'haml'
 require 'sinatra/flash'
 require 'httparty'
@@ -17,196 +18,11 @@ class TeamPayApp < Sinatra::Base
     enable :logging
   end
 
-  configure :development do
-    set :session_secret, "something"    # ignore if not using shotgun in development
-  end
-
-  API_BASE_URI = 'http://localhost:9393'
-
   helpers do
-    def get_team(teamname)
-      var = SalaryScraper::BasketballReference.new
-      return nil if teamname == 'default'
-      begin
-        var.to_array_of_hashes(teamname.upcase)
-      rescue
-        nil
-      end
-    end
-
-    def get_team2(teamname)
-      var = SalaryScraper::BasketballReference.new
-      begin
-        var.to_array_of_hashes(teamname.upcase)
-      rescue
-        halt 404
-      else
-        var.to_array_of_hashes(teamname.upcase)
-      end
-    end
-
-    def get_team_players(teamname)
-      begin
-        team = get_team(teamname)
-        team_players = []
-        team.each do |player_salary_scrape|
-          team_players << player_salary_scrape['Player']
-        end
-      rescue
-        halt 404
-      end
-      team_players
-    end
-
-    def player_salary_data(teamname, player_name)
-
-      begin
-        salary_scrape = get_team2(teamname[0])
-        player_scrape = []
-        player_name.each do |each_player|
-          salary_scrape.each do |data_row|
-            player_scrape <<  data_row  if data_row['Player'] == each_player
-          end
-        end
-      rescue
-        halt 404
-      else
-        player_scrape
-      end
-    end
-
-    def one_total(data_row, each_player)
-      player_scrape, fullpay = 0, []
-      player_scrape +=  parse_money(data_row['2014-15'])
-      player_scrape +=  parse_money(data_row['2015-16'])
-      player_scrape +=  parse_money(data_row['2016-17'])
-      player_scrape +=  parse_money(data_row['2017-18'])
-      player_scrape +=  parse_money(data_row['2018-19'])
-      player_scrape +=  parse_money(data_row['2019-20'])
-      fullpay << { 'player' => each_player,
-                   'fullpay' => back_to_money(player_scrape) }
-      fullpay
-    end
-
-    def player_total_salary(teamname, player_name)
-      players = []
-      return nil if teamname[0] == 'default'
-
-      begin
-        salary_scrape = get_team(teamname[0])
-        player_name.each do |each_player|
-          salary_scrape.each do |data_row|
-            if data_row['Player'] == each_player
-              players << one_total(data_row, each_player)
-            end
-          end
-        end
-      rescue
-        nil
-      end
-
-        return if players.length==0
-      players
-    end
-
-    def player_total_salary2(teamname, player_name)
-      players = []
-      begin
-        salary_scrape = get_team(teamname[0])
-        player_name.each do |each_player|
-          salary_scrape.each do |data_row|
-            if data_row['Player'] == each_player
-              players << one_total(data_row, each_player)
-            end
-          end
-        end
-      rescue
-        halt 404
-      end
-      players
-    end
-
-    def two_players_salary_data(teamname, player_name)
-      return nil if teamname == 'default'
-      player_scrape = []
-      begin
-        salary_scrape = get_team(teamname[0])
-
-        player_name.each do |each_player|
-          salary_scrape.each do |data_row|
-            player_scrape << diff_total(data_row, each_player) if data_row['Player'] == each_player
-          end
-        end
-        make_salary_comparisons(player_scrape)
-      rescue
-        nil
-      else
-        make_salary_comparisons(player_scrape)
-      end
-    end
-
-    def two_players_salary_data2(teamname, player_name)
-      return nil if teamname == 'default'
-      player_scrape = []
-      begin
-        salary_scrape = get_team(teamname[0])
-
-        player_name.each do |each_player|
-          salary_scrape.each do |data_row|
-            player_scrape << diff_total(data_row, each_player) if data_row['Player'] == each_player
-          end
-        end
-        make_salary_comparisons(player_scrape)
-      rescue
-        halt 404
-      else
-        make_salary_comparisons(player_scrape)
-      end
-    end
-
-    def make_salary_comparisons(player_scrape)
-      if player_scrape[0]['fullpay'] > player_scrape[1]['fullpay']
-        diff = player_scrape[0]['fullpay'] - player_scrape[1]['fullpay']
-        return_string = "#{player_scrape[0]['player']} makes #{back_to_money(diff)} more than #{player_scrape[1]['player']} "
-      elsif player_scrape[1]['fullpay'] > player_scrape[0]['fullpay']
-        diff = player_scrape[1]['fullpay'] - player_scrape[0]['fullpay']
-        return_string = "#{player_scrape[1]['player']} makes #{back_to_money(diff)} more than #{player_scrape[0]['player']} "
-      else
-        return_string = "#{player_scrape[1]['player']} and #{player_scrape[0]['player']} makes the same salary (#{back_to_money(player_scrape[0]['fullpay'])})"
-      end
-      return_string
-    end
-
-    def diff_total(data_row, each_player)
-      player_scrape = 0
-      player_scrape += parse_money(data_row['2014-15'])
-      player_scrape += parse_money(data_row['2015-16'])
-      player_scrape += parse_money(data_row['2016-17'])
-      player_scrape += parse_money(data_row['2017-18'])
-      player_scrape += parse_money(data_row['2018-19'])
-      player_scrape += parse_money(data_row['2019-20'])
-      fullpay = { 'player' => each_player,
-                  'fullpay' => player_scrape }
-      fullpay
-    end
-
-    def parse_money(money)
-      data = money.gsub(/[$,]/, '$' => '', ',' => '')
-      data.to_i
-    end
-
-    def back_to_money(data)
-      money = "$#{data.to_s.reverse.gsub(/...(?=.)/, '\&,').reverse}"
-      money
-    end
-
-    def current_page?(path = ' ')
-      path_info = request.path_info
-      path_info += ' ' if path_info == '/'
-      request_path = path_info.split '/'
-      request_path[1] == path
-    end
+    include Helpers
   end
+
+  API_BASE_URI = "http://localhost:9292"
 
   get '/' do
     haml :home
@@ -233,220 +49,150 @@ class TeamPayApp < Sinatra::Base
     haml :salary
   end
 
-  delete '/individualsalaries/:id' do
-    request_url = "#{API_BASE_URI}/api/v1/check3/#{params[:id]}"
-    result = HTTParty.delete(request_url)
-    flash[:notice] = 'record deleted'
-    redirect '/individualsalaries'
-  end
-
-  delete '/playertotal/:id' do
-    request_url = "#{API_BASE_URI}/api/v1/incomes/#{params[:id]}"
-    result = HTTParty.delete(request_url)
-    flash[:notice] = 'record deleted'
-    redirect '/playertotal'
-  end
-
-
   get '/individualsalaries' do
-    @action = :create
     haml :individualsalaries
   end
 
   post '/individualsalaries' do
-    request_url = "#{API_BASE_URI}/api/v1/check3"
+    income = Income.new
+    income.player_names2 = params[:playername2]
+    income.teamnames = params[:teamname]
+    income.player_names = params[:playername1]
 
-    playername2 = params[:playername2]
-    teamname = params[:teamname]
-    playername1 = params[:playername1]
-    params_h = {
-          playername2: playername2,
-          teamname: teamname,
-          playername1: playername1
-    }
-
-    options =  {
-                  body: params_h.to_json,
-                  headers: { 'Content-Type' => 'application/json' }
-               }
-
-    result = HTTParty.post(request_url, options)
-
-    if (result.code != 200)
-      flash[:notice] = 'Players not found! Ensure that team and player names are spelled correctly. '
+    if params[:playername2]=="" || params[:playername1]==""
+      flash[:notice] = 'Error! Incorrect Inputs'
       redirect '/individualsalaries'
-      return nil
     end
 
-    id = result.request.last_uri.path.split('/').last
-    session[:result] = result.to_json
-    session[:playername2] = playername2
-    session[:playername1] = playername1
-    session[:teamname] = teamname
-    session[:action] = :create
-    redirect "/individualsalaries/#{id}"
+    if income.save
+      redirect "/individualsalaries/#{income.id}"
+    end
+
+    haml :individualsalaries
   end
 
   get '/individualsalaries/:id' do
-    if session[:action] == :create
-      @results = session[:result]
-      @teamname = session[:teamname]
-      @playername = session[:playername1]
-      @playername2 = session[:playername2]
-    else
-      request_url = "#{API_BASE_URI}/api/v1/check3/#{params[:id]}"
-      options =  { headers: { 'Content-Type' => 'application/json' } }
-      result = HTTParty.get(request_url, options)
-      @results = result
-      @id = params[:id]
+
+      income = Income.find(params[:id])
+      teamname = [income.teamnames]
+      player_names = [income.player_names,income.player_names2]
+      @Results = two_players_salary_data(teamname, player_names)
+    if @Results.nil?
+      flash[:notice] = 'Players Not Found! Check Spelling and Team selected' if @Results.nil?
+      redirect '/individualsalaries'
     end
 
-    @id = params[:id]
-    @action = :update
+
     haml :individualsalaries
   end
 
   get '/playertotal' do
-    @action2 = :create
+    session[:action] = :wait
     haml :playertotal
   end
 
   post '/playertotal' do
-    request_url = "#{API_BASE_URI}/api/v1/incomes"
+    income = Income.new
+    income.teamnames = params[:teamname]
+    income.player_names = params[:playername1]
 
-    teamname = params[:teamname]
-    playername1 = params[:playername1]
-    params_h = {
-          teamname: teamname,
-          playername1: playername1
-    }
-
-    options =  {
-                  body: params_h.to_json,
-                  headers: { 'Content-Type' => 'application/json' }
-               }
-
-    result = HTTParty.post(request_url, options)
-
-    if (result.code != 200)
-      flash[:notice] = 'Player not found! Ensure that team and player name is spelled correctly. '
+    if params[:playername1]==""
+      flash[:notice] = 'Error! Incorrect Inputs'
       redirect '/playertotal'
-      return nil
     end
 
-
-    id = result.request.last_uri.path.split('/').last
-    session[:result] = result.to_json
-    session[:playername1] = playername1
-    session[:teamname] = teamname
-    session[:action] = :create
-    redirect "/playertotal/#{id}"
-  end
-
-  get '/playertotal/:id' do
-    if session[:action] == :create
-      @fullpay = session[:result]
-      @teamname2 = session[:teamname]
-      @playername2 = session[:playername1]
-    else
-      request_url = "#{API_BASE_URI}/api/v1/incomes/#{params[:id]}"
-      options =  { headers: { 'Content-Type' => 'application/json' } }
-      result = HTTParty.get(request_url, options)
-      @fullpay = JSON.parse(result)
-
-
+    if income.save
+      redirect "/playertotal/#{income.id}"
     end
 
-    @id = params[:id]
-    @action2 = :update
     haml :playertotal
   end
 
-
-  #API
-  
-  delete '/api/v1/check3/:id' do
-    income = Income.destroy(params[:id])
+  put '/playertotal' do
+    @id = params[:id]
+    @new_teamname = params[:teamname]
+    @player_name = params[:playername1]
+    put_url = "#{API_BASE_URI}/api/v2/playertotal/#{@id}/#{@new_teamname}/#{@player_name}"
+    options = {
+      headers: { 'Content-Type' => 'application/json' }
+    }
+    response = HTTParty.put(put_url, options)
+    flash[:notice] = 'Record updated'
+    redirect "/playertotal/#{@id}"
   end
 
-  post '/api/v1/check3' do
-    content_type :json
-
-    body = request.body.read
-    logger.info body
-    begin
-      req = JSON.parse(body)
-      logger.info req
-    rescue Exception => e
-      puts e.message
-      halt 400
+  get '/playertotal/:id' do
+      @id = params[:id]
+      income = Income.find(@id)
+      teamname = [income.teamnames]
+      player_names = [income.player_names]
+      @Result = player_total_salary(teamname, player_names)
+    if @Result.nil?
+      flash[:notice] = 'Players Not Found! Check Spelling and Team selected' if @Result.nil?
+      redirect '/playertotal'
+    else
+      @player=@Result[0][0]['player']
+      @fullpay=@Result[0][0]['fullpay']
     end
-    incomes = Income.new
-    incomes.teamname = req['teamname']
-    incomes.playername1 = req['playername1']
-    incomes.playername2 = req['playername2']
 
-    if incomes.save
-      redirect "/api/v1/check3/#{incomes.id}"
-    end
+
+    haml :playertotal
   end
 
-  get '/api/v1/check3/:id' do
-    content_type :json
-    logger.info "GET /api/v1/check3/#{params[:id]}"
+  get '/playertotal/edit/:id' do
+    session[:action] = :edit
+    @id = params[:id]
+    income = Income.find(@id)
+    @teamname = income.teamnames
+    @player = income.player_names
+    haml :playertotal
+  end
+
+  not_found do
+    status 404
+    'not found'
+  end
+
+
+  #API starts here
+
+  put 'api/v2/playertotal/:id/:teamname/:player_name1' do
     begin
-      @income = Income.find(params[:id])
-      teamname = [@income.teamname]
-      playernames = [@income.playername1,@income.playername2]
+      if session[:action] == 'edit'
+        Income.update(params[:id], :teamnames => params[:teamname], :player_names => params[:player_name1])
+      end
     rescue
       halt 400
     end
-
-    result = two_players_salary_data2(teamname, playernames).to_json
-    logger.info "result: #{result}\n"
-    result
   end
 
-  delete '/api/v1/incomes/:id' do
-    income = Income.destroy(params[:id])
-  end
-
-  post '/api/v1/incomes' do
+  get '/api/v2/incomes/:id' do
     content_type :json
-
-    body = request.body.read
-    logger.info body
     begin
-      req = JSON.parse(body)
-      logger.info req
-    rescue Exception => e
-      puts e.message
-      halt 400
-    end
-    incomes = Income.new
-    incomes.teamname = req['teamname']
-    incomes.playername1 = req['playername1']
-
-    if incomes.save
-      redirect "/api/v1/incomes/#{incomes.id}"
-    end
-  end
-
-
-  get '/api/v1/incomes/:id' do
-    content_type :json
-    logger.info "GET /api/v1/incomes/#{params[:id]}"
-    begin
-      @total = Income.find(params[:id])
-      teamname = [@total.teamname]
-      playername1 = [@total.playername1]
+      income = Income.find(params[:id])
+      teamname = JSON.parse(income.teamnames)
+      player_names = JSON.parse(income.player_names)
     rescue
       halt 400
     end
+    player_total_salary2(teamname, player_names).to_json
+  end
 
-    result = player_total_salary2(teamname, playername1).to_json
-    logger.info "result: #{result}\n"
-    result
+  post '/api/v2/incomes' do
+      content_type :json
+    begin
+      req = JSON.parse(request.body.read)
+    rescue
+      halt 400
+    end
+    income = Income.new
+    income.description = req['description'].to_json
+    income.teamnames = req['teamname'].to_json
+    income.player_names = req['player_name'].to_json
+
+    if income.save
+      redirect "/api/v2/incomes/#{income.id}"
+    end
   end
 
   get '/api/v1/:teamname.json' do
