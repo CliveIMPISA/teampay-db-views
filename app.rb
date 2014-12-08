@@ -12,6 +12,7 @@ require 'httparty'
 class TeamPayApp < Sinatra::Base
   enable :sessions
   register Sinatra::Flash
+  use Rack::MethodOverride
 
   configure :production, :development do
     enable :logging
@@ -20,6 +21,8 @@ class TeamPayApp < Sinatra::Base
   helpers do
     include Helpers
   end
+
+  API_BASE_URI = "http://localhost:9292"
 
   get '/' do
     haml :home
@@ -84,6 +87,7 @@ class TeamPayApp < Sinatra::Base
   end
 
   get '/playertotal' do
+    session[:action] = :wait
     haml :playertotal
   end
 
@@ -104,9 +108,22 @@ class TeamPayApp < Sinatra::Base
     haml :playertotal
   end
 
-  get '/playertotal/:id' do
+  put '/playertotal' do
+    @id = params[:id]
+    @new_teamname = params[:teamname]
+    @player_name = params[:playername1]
+    put_url = "#{API_BASE_URI}/api/v2/playertotal/#{@id}/#{@new_teamname}/#{@player_name}"
+    options = {
+      headers: { 'Content-Type' => 'application/json' }
+    }
+    response = HTTParty.put(put_url, options)
+    flash[:notice] = 'Record updated'
+    redirect "/playertotal/#{@id}"
+  end
 
-      income = Income.find(params[:id])
+  get '/playertotal/:id' do
+      @id = params[:id]
+      income = Income.find(@id)
       teamname = [income.teamnames]
       player_names = [income.player_names]
       @Result = player_total_salary(teamname, player_names)
@@ -128,7 +145,6 @@ class TeamPayApp < Sinatra::Base
     income = Income.find(@id)
     @teamname = income.teamnames
     @player = income.player_names
-
     haml :playertotal
   end
 
@@ -139,6 +155,16 @@ class TeamPayApp < Sinatra::Base
 
 
   #API starts here
+
+  put 'api/v2/playertotal/:id/:teamname/:player_name1' do
+    begin
+      if session[:action] == 'edit'
+        Income.update(params[:id], :teamnames => params[:teamname], :player_names => params[:player_name1])
+      end
+    rescue
+      halt 400
+    end
+  end
 
   get '/api/v2/incomes/:id' do
     content_type :json
