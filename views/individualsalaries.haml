@@ -40,12 +40,11 @@
         %input{type: 'text', name: 'playername1', class:'textbox', id: 'home-form-playername1', placeholder: 'First Player here...'}
         %input{type: 'text', name: 'playername2', class:'textbox', id: 'home-form-playername2', placeholder: 'Second Player here...'}
         %input{type: 'submit', id: 'home-form-submit', class: 'submit', value: 'submit'}
+
+
       %p
-
-
-  -if @results
-    %label{} #{@results}
-
-    %form{:action => "/individualsalaries/#{@id}" , :method => 'post' , :id => 'delete-form'}
-      - if @action == :update
-        %input{:type => 'submit' , :name => '_method', :class => 'submit', :value => 'delete'}
+      -if @Results
+        %form{action:'', method:'post'}
+          %input{type: 'submit', name: '_method', class: 'submit', value: 'put'}
+        %form{action:'', method:'post'}
+          %input{type: 'submit', name: '_method', class: 'submit', value: 'delete'}
