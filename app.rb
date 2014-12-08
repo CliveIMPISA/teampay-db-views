@@ -21,7 +21,7 @@ class TeamPayApp < Sinatra::Base
     set :session_secret, "something"    # ignore if not using shotgun in development
   end
 
-  API_BASE_URI = 'http://localhost:9292'
+  API_BASE_URI = 'http://localhost:9393'
 
   helpers do
     def get_team(teamname)
@@ -306,6 +306,65 @@ class TeamPayApp < Sinatra::Base
     haml :individualsalaries
   end
 
+  get '/playertotal' do
+    @action2 = :create
+    haml :playertotal
+  end
+
+  post '/playertotal' do
+    request_url = "#{API_BASE_URI}/api/v1/incomes"
+
+    teamname = params[:teamname]
+    playername1 = params[:playername1]
+    params_h = {
+          teamname: teamname,
+          playername1: playername1
+    }
+
+    options =  {
+                  body: params_h.to_json,
+                  headers: { 'Content-Type' => 'application/json' }
+               }
+
+    result = HTTParty.post(request_url, options)
+
+    if (result.code != 200)
+      flash[:notice] = 'Player not found! Ensure that team and player name is spelled correctly. '
+      redirect '/playertotal'
+      return nil
+    end
+
+
+    id = result.request.last_uri.path.split('/').last
+    session[:result] = result.to_json
+    session[:playername1] = playername1
+    session[:teamname] = teamname
+    session[:action] = :create
+    redirect "/playertotal/#{id}"
+  end
+
+  get '/playertotal/:id' do
+    if session[:action] == :create
+      @fullpay = session[:result]
+      @teamname2 = session[:teamname]
+      @playername2 = session[:playername1]
+    else
+      request_url = "#{API_BASE_URI}/api/v1/incomes/#{params[:id]}"
+      options =  { headers: { 'Content-Type' => 'application/json' } }
+      result = HTTParty.get(request_url, options)
+      @fullpay = JSON.parse(result)
+
+
+    end
+
+    @id = params[:id]
+    @action2 = :update
+    haml :playertotal
+  end
+
+
+  #API
+  
   delete '/api/v1/check3/:id' do
     income = Income.destroy(params[:id])
   end
@@ -348,60 +407,6 @@ class TeamPayApp < Sinatra::Base
     result
   end
 
-  get '/playertotal' do
-    @action2 = :create
-    haml :playertotal
-  end
-
-  post '/playertotal' do
-    request_url = "#{API_BASE_URI}/api/v1/incomes"
-
-    teamname = params[:teamname]
-    playername1 = params[:playername1]
-    params_h = {
-          teamname: teamname,
-          playername1: playername1
-    }
-
-    options =  {
-                  body: params_h.to_json,
-                  headers: { 'Content-Type' => 'application/json' }
-               }
-
-    result = HTTParty.post(request_url, options)
-
-    if (result.code != 200)
-      flash[:notice] = 'Player not found! Ensure that team and player name is spelled correctly. '
-      redirect '/playertotal'
-      return nil
-    end
-
-    id = result.request.last_uri.path.split('/').last
-    session[:result] = result.to_json
-    session[:playername1] = playername1
-    session[:teamname] = teamname
-    session[:action] = :create
-    redirect "/playertotal/#{id}"
-  end
-
-  get '/playertotal/:id' do
-    if session[:action] == :create
-      @fullpay = session[:result]
-      @teamname2 = session[:teamname]
-      @playername2 = session[:playername1]
-    else
-      request_url = "#{API_BASE_URI}/api/v1/incomes/#{params[:id]}"
-      options =  { headers: { 'Content-Type' => 'application/json' } }
-      result = HTTParty.get(request_url, options)
-      @fullpay = JSON.parse(result)
-
-    end
-
-    @id = params[:id]
-    @action2 = :update
-    haml :playertotal
-  end
-
   delete '/api/v1/incomes/:id' do
     income = Income.destroy(params[:id])
   end
@@ -426,6 +431,7 @@ class TeamPayApp < Sinatra::Base
       redirect "/api/v1/incomes/#{incomes.id}"
     end
   end
+
 
   get '/api/v1/incomes/:id' do
     content_type :json
@@ -480,8 +486,4 @@ class TeamPayApp < Sinatra::Base
 
 
 
-  not_found do
-    status 404
-    'not found'
-  end
 end
